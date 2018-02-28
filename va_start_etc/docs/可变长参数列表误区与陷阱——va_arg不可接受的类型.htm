@@ -1,0 +1,785 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head id="Head"><title>
+	可变长参数列表误区与陷阱——va_arg不可接受的类型 - OwnWaterloo - C++博客
+</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta id="metaKeywords" name="keywords" content="可变长参数列表误区与陷阱——va_arg不可接受的类型"><link type="text/css" rel="stylesheet" href="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/common.css"><link id="MainCss" type="text/css" rel="stylesheet" href="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/style.css"><link id="SecondaryCss" type="text/css" rel="stylesheet" href="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/customcss.css"><link id="RSSLink" title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cppblog.com/ownwaterloo/rss.aspx"><script src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/ga.js" async="" type="text/javascript"></script><script src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/pubads_impl_32.js" type="text/javascript" async=""></script></head>
+<body ryt12791="1">
+    <form name="Form1" method="post" action="unacceptable_type_in_va_arg.html" onsubmit="javascript:return WebForm_OnSubmit();" id="Form1">
+<div>
+<input name="__EVENTTARGET" id="__EVENTTARGET" value="" type="hidden">
+<input name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" type="hidden">
+<input name="__VIEWSTATE" id="
+__VIEWSTATE" value="" type="hidden">
+</div>
+
+<script src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/gpt.js" type="text/javascript" async=""></script><script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['Form1'];
+if (!theForm) {
+    theForm = document.Form1;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/WebResource.js" type="text/javascript"></script>
+
+<script language="JavaScript">
+									function ctlent(evt,id)
+											{
+												if(evt.ctrlKey && evt.keyCode == 13)
+												{	
+													try
+													{
+														TempSave(id);
+													}
+													catch(ex)
+													{
+													}
+													finally
+													{
+													    __doPostBack('AjaxHolder$PostComment$btnSubmit','')
+													}
+												}
+		
+												}</script>
+												<script language="JavaScript">function SetReplyAuhor(author){document.getElementById('AjaxHolder_PostComment_tbComment').value+="@"+author+"\n";document.getElementById('AjaxHolder_PostComment_tbComment').focus();return false}</script>
+<script src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/ScriptResource.js" type="text/javascript"></script>
+<script src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/ScriptResource_003.js" type="text/javascript"></script>
+<script src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/ScriptResource_002.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+function WebForm_OnSubmit() {
+if (typeof(ValidatorOnSubmit) == "function" && ValidatorOnSubmit() == false) return false;
+return true;
+}
+//]]>
+</script>
+
+        
+<!--done-->
+<div id="centerbody" align="center">
+<div id="header">
+	
+<!--done-->
+<div class="header">
+	<div class="headerText">
+		<a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.cppblog.com/ownwaterloo/">OwnWaterloo</a><br>
+		
+	</div>
+</div>
+
+</div>
+<div id="main">
+<div id="mytopmenu">
+	
+	<div id="mylinks">
+<!--done-->
+<a id="MyLinks1_HomeLink" class="menu" href="http://www.cppblog.com/">C++博客</a>&nbsp;&nbsp;&nbsp;
+<a id="MyLinks1_MyHomeLink" class="menu" href="http://www.cppblog.com/ownwaterloo/">首页</a>&nbsp;&nbsp;&nbsp;
+<a id="MyLinks1_NewPostLink" class="menu" href="http://www.cppblog.com/ownwaterloo/admin/EditPosts.aspx?opt=1">新随笔</a>&nbsp;&nbsp;&nbsp;
+<a id="MyLinks1_ContactLink" accesskey="9" class="menu" href="http://www.cppblog.com/ownwaterloo/contact.aspx?id=1">联系</a>&nbsp;&nbsp;&nbsp;
+<a id="MyLinks1_Syndication" class="menu" href="http://www.cppblog.com/ownwaterloo/Rss.aspx">聚合</a><a id="MyLinks1_XMLLink" href="http://www.cppblog.com/ownwaterloo/Rss.aspx"><img src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/xml_002.gif" style="border-width:0px;"></a>&nbsp;&nbsp;&nbsp;
+<a id="MyLinks1_Admin" class="menu" href="http://www.cppblog.com/ownwaterloo/admin/EditPosts.aspx">管理</a>
+</div>
+		<div id="mystats">
+			
+<!--done-->
+<div class="blogStats">
+posts - 16,&nbsp;
+comments - 34,&nbsp;
+trackbacks - 0
+
+</div></div>
+	
+</div>
+<div id="centercontent">
+	
+					
+<!--done-->
+<div class="post">
+	<div class="postTitle">
+		<a id="viewpost1_TitleUrl" class="postTitle2" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html">可变长参数列表误区与陷阱——va_arg不可接受的类型</a>
+	</div>
+	实现一个有可变长参数列表函数的时候，会使用到stdarg.h（这里不讨论varargs.h）中提供的宏。<br><br>例如，我们要实现一个简易的my_printf：<br>1. 它只返回void， 不记录输出的字符数目<br>2. 它只接受"%d"按整数输出、"%c"按字符输出、"%%"输出'%'本身<br>如下：<br>
+<div style="BORDER-RIGHT: #cccccc 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: #cccccc 1px solid; PADDING-LEFT: 4px; FONT-SIZE: 13px; PADDING-BOTTOM: 4px; BORDER-LEFT: #cccccc 1px solid; WIDTH: 98%; WORD-BREAK: break-all; PADDING-TOP: 4px; BORDER-BOTTOM: #cccccc 1px solid; BACKGROUND-COLOR: #eeeeee"><span style="COLOR: #008080">&nbsp;1</span>&nbsp;<span style="COLOR: #000000">#include&nbsp;</span><span style="COLOR: #000000">&lt;</span><span style="COLOR: #000000">stdarg.h</span><span style="COLOR: #000000">&gt;</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">&nbsp;2</span>&nbsp;<span style="COLOR: #000000"><br></span><span style="COLOR: #008080">&nbsp;3</span>&nbsp;<span style="COLOR: #000000"></span><span style="COLOR: #0000ff">void</span><span style="COLOR: #000000">&nbsp;my_printf(</span><span style="COLOR: #0000ff">const</span><span style="COLOR: #000000">&nbsp;</span><span style="COLOR: #0000ff">char</span><span style="COLOR: #000000">*</span><span style="COLOR: #000000">&nbsp;fmt,&nbsp;...&nbsp;)<br></span><span style="COLOR: #008080">&nbsp;4</span>&nbsp;<span style="COLOR: #000000">{<br></span><span style="COLOR: #008080">&nbsp;5</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;<span style="COLOR: #0000ff">va_list</span>&nbsp;ap;<br></span><span style="COLOR: #008080">&nbsp;6</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;<span style="COLOR: #ff00ff">va_start</span>(ap,fmt);&nbsp;</span><span style="COLOR: #008000">/*</span><span style="COLOR: #008000">&nbsp;用最后一个具有参数的类型的参数去初始化ap&nbsp;</span><span style="COLOR: #008000">*/</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">&nbsp;7</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">for</span><span style="COLOR: #000000">&nbsp;(;</span><span style="COLOR: #000000">*</span><span style="COLOR: #000000">fmt;</span><span style="COLOR: #000000">++</span><span style="COLOR: #000000">fmt)<br></span><span style="COLOR: #008080">&nbsp;8</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;{<br></span><span style="COLOR: #008080">&nbsp;9</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #008000">/*</span><span style="COLOR: #008000">&nbsp;如果不是控制字符&nbsp;</span><span style="COLOR: #008000">*/</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">10</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">if</span><span style="COLOR: #000000">&nbsp;(</span><span style="COLOR: #000000">*</span><span style="COLOR: #000000">fmt</span><span style="COLOR: #000000">!=</span><span style="COLOR: #000000">'</span><span style="COLOR: #000000">%</span><span style="COLOR: #000000">'</span><span style="COLOR: #000000">)<br></span><span style="COLOR: #008080">11</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br></span><span style="COLOR: #008080">12</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;putchar(</span><span style="COLOR: #000000">*</span><span style="COLOR: #000000">fmt);&nbsp;</span><span style="COLOR: #008000">/*</span><span style="COLOR: #008000">&nbsp;直接输出&nbsp;</span><span style="COLOR: #008000">*/</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">13</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">continue</span><span style="COLOR: #000000">;<br></span><span style="COLOR: #008080">14</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br></span><span style="COLOR: #008080">15</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #008000">/*</span><span style="COLOR: #008000">&nbsp;如果是控制字符，查看下一字符&nbsp;</span><span style="COLOR: #008000">*/</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">16</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #000000">++</span><span style="COLOR: #000000">fmt;<br></span><span style="COLOR: #008080">17</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">if</span><span style="COLOR: #000000">&nbsp;(</span><span style="COLOR: #000000">'</span><span style="COLOR: #000000">\0</span><span style="COLOR: #000000">'</span><span style="COLOR: #000000">==*</span><span style="COLOR: #000000">fmt)&nbsp;</span><span style="COLOR: #008000">/*</span><span style="COLOR: #008000">&nbsp;如果是结束符&nbsp;</span><span style="COLOR: #008000">*/</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">18</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br></span><span style="COLOR: #008080">19</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert(</span><span style="COLOR: #000000">0</span><span style="COLOR: #000000">);&nbsp;&nbsp;</span><span style="COLOR: #008000">/*</span><span style="COLOR: #008000">&nbsp;这是一个错误&nbsp;</span><span style="COLOR: #008000">*/</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">20</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">break</span><span style="COLOR: #000000">;<br></span><span style="COLOR: #008080">21</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br></span><span style="COLOR: #008080">22</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">switch</span><span style="COLOR: #000000">&nbsp;(</span><span style="COLOR: #000000">*</span><span style="COLOR: #000000">fmt)<br></span><span style="COLOR: #008080">23</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br></span><span style="COLOR: #008080">24</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">case</span><span style="COLOR: #000000">&nbsp;</span><span style="COLOR: #000000">'</span><span style="COLOR: #000000">%</span><span style="COLOR: #000000">'</span><span style="COLOR: #000000">:&nbsp;</span><span style="COLOR: #008000">/*</span><span style="COLOR: #008000">&nbsp;连续2个'%'输出1个'%'&nbsp;</span><span style="COLOR: #008000">*/</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">25</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;putchar(</span><span style="COLOR: #000000">'</span><span style="COLOR: #000000">%</span><span style="COLOR: #000000">'</span><span style="COLOR: #000000">);<br></span><span style="COLOR: #008080">26</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">break</span><span style="COLOR: #000000">;<br></span><span style="COLOR: #008080">27</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">case</span><span style="COLOR: #000000">&nbsp;</span><span style="COLOR: #000000">'</span><span style="COLOR: #000000">d</span><span style="COLOR: #000000">'</span><span style="COLOR: #000000">:&nbsp;</span><span style="COLOR: #008000">/*</span><span style="COLOR: #008000">&nbsp;按照int输出&nbsp;</span><span style="COLOR: #008000">*/</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">28</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br></span><span style="COLOR: #008080">29</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #008000">/*</span><span style="COLOR: #008000">&nbsp;下一个参数是int，取出&nbsp;</span><span style="COLOR: #008000">*/</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">30</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">int</span><span style="COLOR: #000000">&nbsp;i&nbsp;</span><span style="COLOR: #000000">=</span><span style="COLOR: #000000">&nbsp;<span style="COLOR: #ff00ff">va_arg</span>(ap,</span><span style="COLOR: #0000ff">int</span><span style="COLOR: #000000">);<br></span><span style="COLOR: #008080">31</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf(</span><span style="COLOR: #000000">"</span><span style="COLOR: #000000">%d</span><span style="COLOR: #000000">"</span><span style="COLOR: #000000">,i);<br></span><span style="COLOR: #008080">32</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br></span><span style="COLOR: #008080">33</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">break</span><span style="COLOR: #000000">;<br></span><span style="COLOR: #008080">34</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">case</span><span style="COLOR: #000000">&nbsp;</span><span style="COLOR: #000000">'</span><span style="COLOR: #000000">c</span><span style="COLOR: #000000">'</span><span style="COLOR: #000000">:&nbsp;</span><span style="COLOR: #008000">/*</span><span style="COLOR: #008000">&nbsp;按照字符输出&nbsp;</span><span style="COLOR: #008000">*/</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">35</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br></span><span style="COLOR: #008080">36</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #008000">/*</span><span style="COLOR: #008000">*&nbsp;<span style="COLOR: #ff0000">但是，下一个参数是char吗</span></span><span style="COLOR: #008000">*/</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">37</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #008000">/*</span><span style="COLOR: #008000">&nbsp;&nbsp;<span style="COLOR: #ff0000">可以这样取出吗</span>？&nbsp;</span><span style="COLOR: #008000">*/</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">38</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">char</span><span style="COLOR: #000000">&nbsp;c&nbsp;</span><span style="COLOR: #000000">=</span><span style="COLOR: #000000">&nbsp;<span style="COLOR: #ff00ff">va_arg</span>(ap,</span><span style="COLOR: #ff0000"><strong>char</strong></span><span style="COLOR: #000000">);<br></span><span style="COLOR: #008080">39</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf(</span><span style="COLOR: #000000">"</span><span style="COLOR: #000000">%c</span><span style="COLOR: #000000">"</span><span style="COLOR: #000000">,c);<br></span><span style="COLOR: #008080">40</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br></span><span style="COLOR: #008080">41</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="COLOR: #0000ff">break</span><span style="COLOR: #000000">;</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">43</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br></span><span style="COLOR: #008080">44</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;}<br></span><span style="COLOR: #008080">45</span>&nbsp;<span style="COLOR: #000000">&nbsp;&nbsp;&nbsp;&nbsp;<span style="COLOR: #ff00ff">va_end</span>(ap);&nbsp;&nbsp;</span><span style="COLOR: #008000">/*</span><span style="COLOR: #008000">&nbsp;<strong style="COLOR: #ff0000">释放</strong>ap—— <strong><font color="#ff0000">必须！</font></strong>&nbsp;见<strong>相关链接</strong></span><span style="COLOR: #008000">*/</span><span style="COLOR: #000000"><br></span><span style="COLOR: #008080">46</span>&nbsp;<span style="COLOR: #000000">}</span></div>
+<br><br>这与《C++程序设计语言》中的一道练习题很类似。<br>——需要支持"%c"控制符<br><br>在《C++程序设计语言-题解》中，给出了一个答案（中文p65页）。<br>但是， <strong>如同上面的代码一样</strong>，它们都是<strong style="COLOR: #ff0000">错误</strong>的！<br><br><br>
+<hr width="80%">
+<br><br>简单的说，我们用<span style="COLOR: #ff00ff">va_arg</span>(<span style="COLOR: #666699">ap</span>,<span style="COLOR: #0000ff">type</span>)取出一个参数的时候，<br><strong><span style="COLOR: #0000ff">type</span><span style="COLOR: #ff0000">绝</span>对不能为</strong>以下类型：<br>——<span style="COLOR: #0000ff"><strong>char</strong></span>、<span style="COLOR: #0000ff">signed</span> <span style="COLOR: #0000ff"><strong>char</strong></span>、<span style="COLOR: #0000ff">unsigned</span> <span style="COLOR: #0000ff"><strong>char</strong></span><br>——<span style="COLOR: #0000ff"><strong>short</strong></span>、<span style="COLOR: #0000ff">unsigned</span> <span style="COLOR: #0000ff"><strong>short</strong></span><br>——<span style="COLOR: #0000ff">signed</span> <span style="COLOR: #0000ff"><strong>short</strong></span>、<span style="COLOR: #0000ff"><strong>short</strong></span> <span style="COLOR: #0000ff">int</span>、<span style="COLOR: #0000ff">signed</span> <span style="COLOR: #0000ff"><strong>short</strong></span> <span style="COLOR: #0000ff">int</span>、<span style="COLOR: #0000ff">unsigned</span> <span style="COLOR: #0000ff"><strong>short</strong></span> <span style="COLOR: #0000ff">int</span><br>——<span style="COLOR: #0000ff"><strong>float</strong></span><br><br><br>一个简单的理由是：<br>——<strong>调用者<span style="COLOR: #ff0000">绝对不</span>会</strong>向<span style="COLOR: #993300">my_printf</span><strong>传递</strong>以上类型的<strong>实际参数</strong>。<br><br><br>在C语言中，调用一个不带原型声明的函数时：<br>调用者会对<strong>每个</strong>参数执行“默认实际参数<strong>提升</strong>(default argument <strong>promotions</strong>)”。<br><br>同时，对可变长参数列表<strong>超出最后一个</strong>有<strong>类型声明的形式参数</strong>之后的<strong>每一个实际参数</strong>，也将执行上述提升工作。<br>提升工作如下：<br>——float类型的实际参数将提升到double<br>——char、short和相应的signed、unsigned类型的实际参数提升到int<br>——如果int不能存储原值，则提升到unsigned int<br><br>然后，调用者将<strong>提升后</strong>的参数<strong>传递</strong>给被调用者。<br>所以，my_printf是<strong>绝对无法接收到</strong>上述类型的实际参数的。<br><br><br>
+<hr width="80%">
+<br>上面的代码的38与39行，应该改为：<br>
+<div style="BORDER-RIGHT: #cccccc 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: #cccccc 1px solid; PADDING-LEFT: 4px; FONT-SIZE: 13px; PADDING-BOTTOM: 4px; BORDER-LEFT: #cccccc 1px solid; WIDTH: 98%; WORD-BREAK: break-all; PADDING-TOP: 4px; BORDER-BOTTOM: #cccccc 1px solid; BACKGROUND-COLOR: #eeeeee"><span style="COLOR: #0000ff">int</span><span style="COLOR: #000000">&nbsp;c&nbsp;</span><span style="COLOR: #000000">=</span><span style="COLOR: #000000">&nbsp;<span style="COLOR: #ff00ff">va_arg</span>(ap,</span><span style="COLOR: #0000ff"><strong>int</strong></span><span style="COLOR: #000000">);<br>printf(</span><span style="COLOR: #000000">"</span><span style="COLOR: #000000">%c</span><span style="COLOR: #000000">"</span><span style="COLOR: #000000">,c);</span></div>
+<br>同理， 如果需要使用short和float， 也应该这样：<br>
+<div style="BORDER-RIGHT: #cccccc 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: #cccccc 1px solid; PADDING-LEFT: 4px; FONT-SIZE: 13px; PADDING-BOTTOM: 4px; BORDER-LEFT: #cccccc 1px solid; WIDTH: 98%; WORD-BREAK: break-all; PADDING-TOP: 4px; BORDER-BOTTOM: #cccccc 1px solid; BACKGROUND-COLOR: #eeeeee"><span style="COLOR: #0000ff">short</span><span style="COLOR: #000000">&nbsp;s&nbsp;</span><span style="COLOR: #000000">=</span><span style="COLOR: #000000">&nbsp;(</span><span style="COLOR: #0000ff">short</span><span style="COLOR: #000000">)va_arg(ap,</span><span style="COLOR: #0000ff"><strong>int</strong></span><span style="COLOR: #000000">);<br></span><span style="COLOR: #0000ff">float</span><span style="COLOR: #000000">&nbsp;f&nbsp;</span><span style="COLOR: #000000">=</span><span style="COLOR: #000000">&nbsp;(</span><span style="COLOR: #0000ff">float</span><span style="COLOR: #000000">)va_arg(ap,</span><span style="COLOR: #0000ff"><strong>double</strong></span><span style="COLOR: #000000">);</span></div>
+<br>这也是printf族函数没有用于short和float的控制符的原因。<br><br>
+<hr width="90%">
+<br>附录：<br><br>在《C语言程序设计》对可变长参数列表的相关章节中，并没有提到这个陷阱。<br>但是有提到默认实际参数提升的规则：<br><br>在没有函数原型的情况下，char与short类型都将被转换为int类型，float类型将被转换为double类型。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ——《C语言程序设计》第2版 &nbsp;2.7 类型转换 p36<br><br><br><br>在其他一些书籍中，也有提到这个规则：<br><br><br>事情很清楚，如果一个参数没有声明，编译器就没有信息去对它执行标准的类型检查和转换。<br>在这种情况下，一个char或short将作为int传递，float将作为double传递。<br>这些做未必是程序员所期望的。<br>脚注：这些都是由C语言继承来的标准提升。<br>对于由省略号表示的参数，其实际参数在传递之前总执行这些提升（如果它们属于需要提升的类型），将提升后的值传递给有关的函数。——译者注<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ——《C++程序设计语言》第3版-特别版 7.6 p138<br><br>…… float类型的参数会自动转换为double类型，short或char类型的参数会自动转换为int类型 ……<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ——《C陷阱与缺陷》 4.4 形参、实参与返回值 p73<br><br><br>这里有一个陷阱需要避免：<br>va_arg宏的第2个参数不能被指定为<strong>char</strong>、<strong>short</strong>或者<strong>float</strong>类型。<br>因为char和short类型的参数会被转换为int类型，而float类型的参数会被转换为double类型 ……<br>例如，这样写<strong>肯定是不对</strong>的：<br>c = va_arg(ap,char);<br>因为我们无法传递一个char类型参数，如果传递了，它将会被自动转化为int类型。上面的式子应该写成：<br>c = va_arg(ap,int);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ——《C陷阱与缺陷》p164<br><br>
+<hr width="90%">
+<br>2009/05/07 修改：<br>printf函数族有用于short的控制符“h”。<br>见：<a href="http://www.cplusplus.com/reference/clibrary/cstdio/printf/"><u><font color="#0000ff">http://www.cplusplus.com/reference/clibrary/cstdio/printf/</font></u></a><br><br>
+<hr width="90%">
+<br>相关链接：<br><br>——《可变长参数列表误区与陷阱——va_end是必须的吗？》<br><a href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/is_va_end_necessary.html">http://www.cppblog.com/ownwaterloo/archive/2009/04/21/is_va_end_necessary.html</a><br><br>
+<hr width="90%">
+<br><br><a href="http://creativecommons.org/licenses/by-nc-sa/2.5/cn/" rel="license"><img style="BORDER-TOP-WIDTH: 0px; BORDER-LEFT-WIDTH: 0px; BORDER-BOTTOM-WIDTH: 0px; BORDER-RIGHT-WIDTH: 0px" alt="Creative Commons License" src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/88x31.png"></a><br><br>本<span rel="dc:type" href="http://purl.org/dc/dcmitype/Text" xmlns:dc="http://purl.org/dc/elements/1.1/">作品</span>采用<a href="http://creativecommons.org/licenses/by-nc-sa/2.5/cn/" rel="license">知识共享署名-非商业性使用-相同方式共享 2.5 中国大陆许可协议</a>进行许可。 <br>
+<p>转载请注明 ：<br>文章作者 - OwnWaterloo<br>发表时间 - 2009年04月21日<br>原文链接 - <a href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html">http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html</a></p>
+
+	<div class="postDesc">posted on 2009-04-21 23:41 <a href="http://www.cppblog.com/ownwaterloo/">OwnWaterloo</a> 阅读(5986) <a href="#Post">评论(5)</a> &nbsp;<a href="http://www.cppblog.com/ownwaterloo/admin/EditPosts.aspx?postid=80655">编辑</a>&nbsp;<a href="http://www.cppblog.com/ownwaterloo/AddToFavorite.aspx?id=80655">收藏</a> <a href="http://www.cppblog.com/ownwaterloo/services/trackbacks/80655.aspx">引用</a>  </div>
+</div>
+<img src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/80655.jpeg" height="1" width="1">
+
+<!--
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+xmlns:dc="http://purl.org/dc/elements/1.1/"
+xmlns:trackback="http://madskills.com/public/xml/rss/module/trackback/">
+<rdf:Description
+rdf:about="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html"
+dc:identifier="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html"
+dc:title="可变长参数列表误区与陷阱——va_arg不可接受的类型"
+trackback:ping="http://www.cppblog.com/ownwaterloo/services/trackbacks/80655.aspx" />
+</rdf:RDF>
+-->
+
+<script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('AjaxHolder$scriptmanager1', document.getElementById('Form1'));
+Sys.WebForms.PageRequestManager.getInstance()._updateControls(['tAjaxHolder$UpdatePanel1'], [], [], 90);
+//]]>
+</script>
+
+<div id="AjaxHolder_UpdatePanel1">
+	    
+    <a name="pagedcomment"></a>
+<!--done-->
+<br>
+<b>FeedBack:</b>
+<div class="feedbackNoItems"></div>
+	
+
+		<div class="feedbackItem">
+			<div class="feedbackListTitle"><a title="permalink: re: 可变长参数列表误区与陷阱——va_arg不可接受的类型" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html#80690">#</a>&nbsp;<a name="80690"></a>re: 可变长参数列表误区与陷阱——va_arg不可接受的类型</div>
+			<div class="feedbackListSubtitle">
+				2009-04-22 10:42 | <a id="AjaxHolder_Comments_CommentList_ctl00_NameLink" href="http://www.vitacy.cn/" target="_blank">vitacy</a><br>
+				<div align="left">va_arg(va_list,type)是自动int对齐的。&nbsp;&nbsp;<a onclick='return SetReplyAuhor("vitacy")' href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html#post">回复</a>&nbsp;&nbsp;<a title="查看该作者发表过的评论" href="http://www.cppblog.com/comment?author=vitacy" target="_blank">更多评论</a><br><a id="AjaxHolder_Comments_CommentList_ctl00_DeleteLink" href="javascript:__doPostBack('AjaxHolder$Comments$CommentList$ctl00$DeleteLink','')"></a>&nbsp;&nbsp;<a id="AjaxHolder_Comments_CommentList_ctl00_EditLink"></a></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListTitle"><a title="permalink: re: 可变长参数列表误区与陷阱——va_arg不可接受的类型" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html#80731">#</a>&nbsp;<a name="80731"></a>re: 可变长参数列表误区与陷阱——va_arg不可接受的类型</div>
+			<div class="feedbackListSubtitle">
+				2009-04-22 15:32 | <a id="AjaxHolder_Comments_CommentList_ctl01_NameLink" href="http://www.cppblog.com/ownwaterloo/" target="_blank">OwnWaterloo</a><br>
+				<div align="left"><div>@vitacy<br><br>1. C标准对默认实际参数提升规则有<strong><span style="COLOR: red">明确</span>规</strong>定。<br>也就是说， 带有可变长参数列表的函数， 绝对不会接受到char类型的实际参数。<br><br>2. C标准对va_arg是否自动对齐<strong><span style="COLOR: red">没有</span>任何说明</strong>。<br>你说的va_arg(va_list,type)是自动对齐， 只是在你的编译器上。<br>并不是所有编译器都能自动帮你完成这个工作。<br><br>在所有C实现上， 能保证第1点， 但不能保证第2点。<br>依赖于第2点， 代码就依赖于特定编译器。<br><br><br>你说va_arg(ap,type)是自动对齐， 证明你有研究过。<br>喜欢作这些研究的， 都是聪明的家伙。<br>但聪明的家伙总喜欢<strong>不按规矩办事</strong>。<br><br><br>在gcc (GCC) 3.4.2 (mingw-special)中， type使用char， 会得到严重的警告：<br>`char' is <strong>promoted</strong> to `int' when passed through `...'<br>(<strong>so you should pass `int' not `char' to `va_arg'</strong>)<br>note: if this code is reached, the program will <strong>abort</strong><br>它会直接挂掉你的程序，来约束你必须按规矩办事。</div>
+&nbsp;&nbsp;<a onclick='return SetReplyAuhor("OwnWaterloo")' href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html#post">回复</a>&nbsp;&nbsp;<a title="查看该作者发表过的评论" href="http://www.cppblog.com/comment?author=OwnWaterloo" target="_blank">更多评论</a><br><a id="AjaxHolder_Comments_CommentList_ctl01_DeleteLink" href="javascript:__doPostBack('AjaxHolder$Comments$CommentList$ctl01$DeleteLink','')"></a>&nbsp;&nbsp;<a id="AjaxHolder_Comments_CommentList_ctl01_EditLink"></a></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListTitle"><a title="permalink: re: 可变长参数列表误区与陷阱——va_arg不可接受的类型" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html#103185">#</a>&nbsp;<a name="103185"></a>re: 可变长参数列表误区与陷阱——va_arg不可接受的类型</div>
+			<div class="feedbackListSubtitle">
+				2009-12-14 16:23 | <a id="AjaxHolder_Comments_CommentList_ctl02_NameLink" target="_blank">mikecheng</a><br>
+				<div align="left">你的说法有问题，估计你没有仔细读manual，在manual中就有用char的例子。&nbsp;&nbsp;<a onclick='return SetReplyAuhor("mikecheng")' href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html#post">回复</a>&nbsp;&nbsp;<a title="查看该作者发表过的评论" href="http://www.cppblog.com/comment?author=mikecheng" target="_blank">更多评论</a><br><a id="AjaxHolder_Comments_CommentList_ctl02_DeleteLink" href="javascript:__doPostBack('AjaxHolder$Comments$CommentList$ctl02$DeleteLink','')"></a>&nbsp;&nbsp;<a id="AjaxHolder_Comments_CommentList_ctl02_EditLink"></a></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListTitle"><a title="permalink: re: 可变长参数列表误区与陷阱——va_arg不可接受的类型" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html#103201">#</a>&nbsp;<a name="103201"></a>re: 可变长参数列表误区与陷阱——va_arg不可接受的类型</div>
+			<div class="feedbackListSubtitle">
+				2009-12-14 19:09 | <a id="AjaxHolder_Comments_CommentList_ctl03_NameLink" href="http://www.cppblog.com/ownwaterloo/" target="_blank">OwnWaterloo</a><br>
+				<div align="left"><div>@mikecheng</div>
+<div>你很悲剧，你<span style="COLOR: #ff0000">仔细</span>阅读的manual中的那个例子是错的。</div>
+&nbsp;&nbsp;<a onclick='return SetReplyAuhor("OwnWaterloo")' href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html#post">回复</a>&nbsp;&nbsp;<a title="查看该作者发表过的评论" href="http://www.cppblog.com/comment?author=OwnWaterloo" target="_blank">更多评论</a><br><a id="AjaxHolder_Comments_CommentList_ctl03_DeleteLink" href="javascript:__doPostBack('AjaxHolder$Comments$CommentList$ctl03$DeleteLink','')"></a>&nbsp;&nbsp;<a id="AjaxHolder_Comments_CommentList_ctl03_EditLink"></a></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListTitle"><a title="permalink: re: 可变长参数列表误区与陷阱——va_arg不可接受的类型[未登录]" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html#197513">#</a>&nbsp;<a name="197513"></a>re: 可变长参数列表误区与陷阱——va_arg不可接受的类型[未登录]<a name="Post"></a></div>
+			<div class="feedbackListSubtitle">
+				2013-01-23 22:36 | <a id="AjaxHolder_Comments_CommentList_ctl04_NameLink" target="_blank">alex</a><br>
+				<div align="left">干吗要把float提升到double，就差没有想到这一条，害我调试了半天。。float一般不是4个自己吗？也算int对齐的呀，真奇怪。&nbsp;&nbsp;<a onclick='return SetReplyAuhor("alex")' href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html#post">回复</a>&nbsp;&nbsp;<a title="查看该作者发表过的评论" href="http://www.cppblog.com/comment?author=alex" target="_blank">更多评论</a><br><a id="AjaxHolder_Comments_CommentList_ctl04_DeleteLink" href="javascript:__doPostBack('AjaxHolder$Comments$CommentList$ctl04$DeleteLink','')"></a>&nbsp;&nbsp;<a id="AjaxHolder_Comments_CommentList_ctl04_EditLink"></a></div>
+			</div>
+			
+			
+		</div>
+	
+
+
+
+<div id="AjaxHolder_Comments_divRefreshComments" style="text-align:right;margin-right:10px;margin-bottom:5px;font-size:12px;"><a id="AjaxHolder_Comments_refreshList" href="javascript:__doPostBack('AjaxHolder$Comments$refreshList','')">刷新评论列表</a></div>
+<style>
+td { font-size: 12px }
+.commentTextBox 
+{ 
+    font-family : Verdana; 
+    font-size: 13px;
+ }
+</style>
+<!--Beging Temp Save-->
+<style>.userData { BEHAVIOR: url(#default#userdata) }
+	</style>
+<div class="userData" id="CommentsPersistDiv"></div>
+<script type="text/javascript">
+function pageLoad()
+{
+    Sys.WebForms.PageRequestManager.getInstance().add_initializeRequest(handleInitializeRequest);
+    //Sys.WebForms.PageRequestManager.getInstance().add_endRequest(handleEndRequest);
+}
+
+function handleInitializeRequest(sender, args)
+{
+    var prm = Sys.WebForms.PageRequestManager.getInstance();
+    var eid = args.get_postBackElement().id;
+    if (eid.indexOf("DeleteLink")>0) 
+    {
+       args.get_postBackElement().innerHTML = "<font color='red'>正在删除...</font>";         
+    }    
+    if (eid.indexOf("btnSubmit")>0) 
+    {
+       document.getElementById("AjaxHolder_PostComment_ltSubmitMsg").innerHTML="正在提交...";
+       document.getElementById("AjaxHolder_PostComment_btnSubmit").disabled = true;
+       
+    }    
+   
+}	
+
+function TempSave(ElementID)
+{
+	try
+	{
+	CommentsPersistDiv.setAttribute("CommentContent",document.getElementById(ElementID).value);
+	CommentsPersistDiv.save("CommentXMLStore");
+	}
+	catch(ex)
+	{
+	}
+	
+}
+function Restore(ElementID)
+{
+	CommentsPersistDiv.load("CommentXMLStore");
+	document.getElementById(ElementID).value=CommentsPersistDiv.getAttribute("CommentContent");
+}	
+			
+			
+</script>
+<!--Ene TempSave-->
+<div class="commentform">
+<span id="AjaxHolder_PostComment_ltSubmitMsg" style="color:Red;"></span>
+<br>
+<a name="Feedback"></a>
+	<table border="0" cellpadding="1" cellspacing="1">
+		<tbody><tr>			
+		<td id="AjaxHolder_PostComment_tdOnCommentForm" colspan="3">
+		<a href="http://www.cnblogs.com/alistaffing/p/true_love.html" target="_blank">阿里数据平台事业部诚聘web开发工程师</a><br>		
+		</td>
+	
+		</tr>
+		<tr>
+			<td colspan="3">
+<script type="Text/Javascript">
+try{
+  GA_googleFillSlot("cppblog_commentbox_up");
+  } catch (e) { }
+</script>
+<br> </td>
+		</tr>
+		<tr>
+			<td width="75"></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td colspan="2">
+			<a href="http://www.cnblogs.com/" target="_blank">博客园</a>&nbsp;  <a href="http://q.cnblogs.com/" target="_blank">博问</a>&nbsp; <a href="http://news.cnblogs.com/" target="_blank">IT新闻</a>&nbsp; <a href="http://job.cnblogs.com/cate-cpp_programmer/" target="_blank">C++程序员招聘</a>
+			</td>
+		</tr>
+		<tr>
+			<td width="55">标题</td>
+			<td><input name="AjaxHolder$PostComment$tbTitle" value="re: 可变长参数列表误区与陷阱——va_arg不可接受的类型" id="AjaxHolder_PostComment_tbTitle" class="commenttb" style="width:320" type="text"></td>
+			<td><span id="AjaxHolder_PostComment_RequiredFieldValidator1" style="color:Red;visibility:hidden;">请输入标题</span></td>
+		</tr>
+		<tr>
+			<td>姓名</td>
+			<td><input name="AjaxHolder$PostComment$tbName" id="AjaxHolder_PostComment_tbName" class="commenttb" style="width:320" type="text"></td>
+			<td><span id="AjaxHolder_PostComment_RequiredFieldValidator2" style="color:Red;visibility:hidden;">请输入你的姓名</span></td>
+		</tr>
+		<tr>
+			<td>主页</td>
+			<td><input name="AjaxHolder$PostComment$tbUrl" id="AjaxHolder_PostComment_tbUrl" class="commenttb" style="width:320" type="text"></td>
+			<td><font face="宋体"></font></td>
+		</tr>
+		<tr>
+			<td colspan="3" align="left">
+				<table id="AjaxHolder_PostComment_tbCaptchaImage" class="CommentForm" border="0" cellpadding="0" cellspacing="0">
+		<tbody><tr>
+			<td colspan="3">
+							<span id="AjaxHolder_PostComment_Requiredfieldvalidator4" style="color:Red;display:none;">请输入验证码</span>
+							<span id="AjaxHolder_PostComment_lblImage" style="color:Red;font-weight:bold;"></span>
+						</td>
+		</tr>
+		<tr>
+			<td width="78">验证码</td>
+			<td><input name="AjaxHolder$PostComment$CodeNumberTextBox" id="AjaxHolder_PostComment_CodeNumberTextBox" type="text">*</td>
+			<td align="left">
+							<img src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/JpegImage.jpeg" id="AjaxHolder_PostComment_Img1">
+						</td>
+		</tr>
+	</tbody></table>
+	
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3">内容(提交失败后,可以通过“恢复上次提交”恢复刚刚提交的内容)
+				<span id="AjaxHolder_PostComment_RequiredFieldValidator3" style="color:Red;visibility:hidden;">请输入评论内容</span><br>
+				<textarea name="AjaxHolder$PostComment$tbComment" rows="10" cols="50" id="AjaxHolder_PostComment_tbComment" class="commentTextBox" onkeydown="ctlent(event,'AjaxHolder_PostComment_tbComment')" style="Width:480;Height:220"></textarea></td>
+		</tr>
+		<tr>
+			<td colspan="3">
+		<span id="AjaxHolder_PostComment_Message" style="color:Red;"></span>
+		</td>
+		</tr><tr>
+			<td colspan="3"><input id="AjaxHolder_PostComment_chkRemember" name="AjaxHolder$PostComment$chkRemember" checked="checked" tabindex="-1" type="checkbox"><label for="AjaxHolder_PostComment_chkRemember">Remember Me?</label></td>
+		</tr>
+		<tr>
+			<td height="23"><input name="AjaxHolder$PostComment$btnSubmit" value="提交" onclick="TempSave('AjaxHolder_PostComment_tbComment');WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions(&quot;AjaxHolder$PostComment$btnSubmit&quot;, &quot;&quot;, true, &quot;&quot;, &quot;&quot;, false, false))" id="AjaxHolder_PostComment_btnSubmit" type="submit">
+				</td>
+			<td colspan="2" height="23">&nbsp;
+				<a id="AjaxHolder_PostComment_lnkLogin" href="http://www.cppblog.com/login.aspx?ReturnURL=http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html&amp;SourceURL=/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html">登录</a>&nbsp;&nbsp;<a id="AjaxHolder_PostComment_linkLoginComment" onclick="if(document.getElementById('AjaxHolder_PostComment_tbComment').value != '') return confirm('未提交的评论内容将会丢失, 你真的要进入高级评论吗?');" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html?login=1#Post">使用高级评论</a>&nbsp;&nbsp;<a href="http://www.cppblog.com/RequireRegister.aspx">新用户注册</a>&nbsp;&nbsp;<a href="#Top">返回页首</a>&nbsp;&nbsp;<a id="AjaxHolder_PostComment_lbRestore" onclick="Restore('AjaxHolder_PostComment_tbComment'); return false;" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html#Post">恢复上次提交</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				</td>
+		</tr>
+		<tr>
+			<td colspan="3">[使用Ctrl+Enter键可以直接提交]</td>
+		</tr>
+		<tr>
+		<td colspan="3">
+		<script type="text/javascript">
+var googletag = googletag || {};
+googletag.cmd = googletag.cmd || [];
+(function() {
+var gads = document.createElement('script');
+gads.async = true;
+gads.type = 'text/javascript';
+var useSSL = 'https:' == document.location.protocol;
+gads.src = (useSSL ? 'https:' : 'http:') + 
+'//www.googletagservices.com/tag/js/gpt.js';
+var node = document.getElementsByTagName('script')[0];
+node.parentNode.insertBefore(gads, node);
+})();
+</script>
+
+<script type="text/javascript">
+googletag.cmd.push(function() {
+googletag.defineSlot('/1090369/cppblog_blogpost_bottom', [300, 250], 'div-gpt-ad-1364133579678-0').addService(googletag.pubads());
+googletag.pubads().enableSingleRequest();
+googletag.enableServices();
+});
+</script>
+<!-- cppblog_blogpost_bottom -->
+<div id="div-gpt-ad-1364133579678-0" style="width:300px; height:250px;">
+<script type="text/javascript">
+googletag.cmd.push(function() { googletag.display('div-gpt-ad-1364133579678-0'); });
+</script>
+<div style="border: 0pt none;" id="google_ads_iframe_/1090369/cppblog_blogpost_bottom_0__container__"><iframe src="javascript:&quot;<html><body style='background:transparent'></body></html>&quot;" style="border: 0px none; vertical-align: bottom;" marginheight="0" marginwidth="0" name="google_ads_iframe_/1090369/cppblog_blogpost_bottom_0" id="google_ads_iframe_/1090369/cppblog_blogpost_bottom_0" frameborder="0" height="250" scrolling="no" width="300"></iframe></div><iframe src="javascript:&quot;<html><body style='background:transparent'></body></html>&quot;" style="border: 0px none; vertical-align: bottom; visibility: hidden; display: none;" marginheight="0" marginwidth="0" name="google_ads_iframe_/1090369/cppblog_blogpost_bottom_0__hidden__" id="google_ads_iframe_/1090369/cppblog_blogpost_bottom_0__hidden__" frameborder="0" height="0" scrolling="no" width="0"></iframe></div>
+		
+		</td>
+		</tr>
+		<tr>			
+		<td colspan="3">
+		
+		</td>
+		</tr>
+		<tr>
+			<td colspan="3" height="5"></td>
+		</tr>
+		<tr>
+			<td colspan="3"></td>
+		</tr>
+		<tr>
+			<td colspan="3" height="1"><div id="blogsite">网站导航:
+			<a href="http://www.cnblogs.com/">博客园</a>&nbsp;&nbsp;
+			<a href="http://news.cnblogs.com/">IT新闻</a>&nbsp;&nbsp;
+			<a href="http://www.blogjava.net/">BlogJava</a>&nbsp;&nbsp;
+			<a href="http://kb.cnblogs.com/">知识库</a>&nbsp;&nbsp;
+			<a href="http://job.cnblogs.com/">程序员招聘</a>&nbsp;&nbsp;
+			<a href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html?opt=admin">管理</a>
+			</div></td>
+		</tr>
+		<tr>
+			<td colspan="3">
+				
+<br>
+
+<br>
+
+</td>
+		</tr>
+	</tbody></table>	
+</div>
+<div id="AjaxHolder_PostComment_ValidationSummary1" style="color:Red;display:none;">
+
+	</div>
+
+</div>
+
+				
+	
+<!--done-->
+<div class="footer">
+	
+	Copyright ©2014  OwnWaterloo Powered By: <a href="http://www.cnblogs.com/">博客园</a> 模板提供：<a href="http://blog.hjenglish.com/">沪江博客</a>
+</div>
+</div>
+
+<div id="leftcontent">
+	
+		<div id="leftcontentcontainer">
+			<table id="Calendar1_entryCal" class="Cal" title="日历" style="border-width:1px;border-style:solid;border-collapse:collapse;border:0px" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr><td colspan="7" style="background-color:Transparent;"><table class="CalTitle" style="width:100%;border-collapse:collapse;" border="0" cellspacing="0">
+		<tbody><tr><td class="CalNextPrev" style="width:15%;"><a href="javascript:__doPostBack('Calendar1$entryCal','V5083')" style="color:Black" title="转到上一个月">&lt;</a></td><td style="width:70%;" align="center">2014年1月</td><td class="CalNextPrev" style="width:15%;" align="right"><a href="javascript:__doPostBack('Calendar1$entryCal','V5145')" style="color:Black" title="转到下一个月">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" abbr="日" scope="col" align="center">日</th><th class="CalDayHeader" abbr="一" scope="col" align="center">一</th><th class="CalDayHeader" abbr="二" scope="col" align="center">二</th><th class="CalDayHeader" abbr="三" scope="col" align="center">三</th><th class="CalDayHeader" abbr="四" scope="col" align="center">四</th><th class="CalDayHeader" abbr="五" scope="col" align="center">五</th><th class="CalDayHeader" abbr="六" scope="col" align="center">六</th></tr><tr><td class="CalOtherMonthDay" style="width:14%;" align="center">29</td><td class="CalOtherMonthDay" style="width:14%;" align="center">30</td><td class="CalOtherMonthDay" style="width:14%;" align="center">31</td><td style="width:14%;" align="center">1</td><td style="width:14%;" align="center">2</td><td style="width:14%;" align="center">3</td><td class="CalWeekendDay" style="width:14%;" align="center">4</td></tr><tr><td class="CalWeekendDay" style="width:14%;" align="center">5</td><td style="width:14%;" align="center">6</td><td class="CalTodayDay" style="width:14%;" align="center">7</td><td style="width:14%;" align="center">8</td><td style="width:14%;" align="center">9</td><td style="width:14%;" align="center">10</td><td class="CalWeekendDay" style="width:14%;" align="center">11</td></tr><tr><td class="CalWeekendDay" style="width:14%;" align="center">12</td><td style="width:14%;" align="center">13</td><td style="width:14%;" align="center">14</td><td style="width:14%;" align="center">15</td><td style="width:14%;" align="center">16</td><td style="width:14%;" align="center">17</td><td class="CalWeekendDay" style="width:14%;" align="center">18</td></tr><tr><td class="CalWeekendDay" style="width:14%;" align="center">19</td><td style="width:14%;" align="center">20</td><td style="width:14%;" align="center">21</td><td style="width:14%;" align="center">22</td><td style="width:14%;" align="center">23</td><td style="width:14%;" align="center">24</td><td class="CalWeekendDay" style="width:14%;" align="center">25</td></tr><tr><td class="CalWeekendDay" style="width:14%;" align="center">26</td><td style="width:14%;" align="center">27</td><td style="width:14%;" align="center">28</td><td style="width:14%;" align="center">29</td><td style="width:14%;" align="center">30</td><td style="width:14%;" align="center">31</td><td class="CalOtherMonthDay" style="width:14%;" align="center">1</td></tr><tr><td class="CalOtherMonthDay" style="width:14%;" align="center">2</td><td class="CalOtherMonthDay" style="width:14%;" align="center">3</td><td class="CalOtherMonthDay" style="width:14%;" align="center">4</td><td class="CalOtherMonthDay" style="width:14%;" align="center">5</td><td class="CalOtherMonthDay" style="width:14%;" align="center">6</td><td class="CalOtherMonthDay" style="width:14%;" align="center">7</td><td class="CalOtherMonthDay" style="width:14%;" align="center">8</td></tr>
+</tbody></table>
+<br>
+			
+			
+<h3>常用链接</h3>
+<ul>
+		<li><a id="SingleColumn1_ctl00_repeaterLinks_ctl01_lnkLinkItem" href="http://www.cppblog.com/ownwaterloo/MyPosts.html">我的随笔</a></li>
+	
+		<li><a id="SingleColumn1_ctl00_repeaterLinks_ctl02_lnkLinkItem" href="http://www.cppblog.com/ownwaterloo/MyComments.html">我的评论</a></li>
+	
+		<li><a id="SingleColumn1_ctl00_repeaterLinks_ctl03_lnkLinkItem" href="http://www.cppblog.com/ownwaterloo/OtherPosts.html">我参与的随笔</a></li>
+	</ul>
+<h3>留言簿<span style="font-size:11px;font-weight:normal;">(8)</span></h3>
+<ul>
+	<li>
+		<a id="SingleColumn1__3dd3f34_lnkMessages" href="http://www.cppblog.com/ownwaterloo/Contact.aspx?id=1">给我留言</a>
+	</li><li>
+		<a id="SingleColumn1__3dd3f34_lnkPublicMsgView" href="http://www.cppblog.com/ownwaterloo/default.aspx?opt=msg">查看公开留言</a>
+	</li><li>
+		<a id="SingleColumn1__3dd3f34_lnkPrivateMsgView" href="http://www.cppblog.com/ownwaterloo/admin/MyMessages.aspx">查看私人留言</a>
+	</li>
+</ul>
+
+<!--done-->
+
+		<h1 class="catListTitle">随笔档案<span style="font-size:11px;font-weight:normal">(16)</span></h1>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl01_Link" class="listitem" href="http://www.cppblog.com/ownwaterloo/archive/2009/04.html">2009年4月 (12)</a></li>
+			
+				<li class="catListItem"> <a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl02_Link" class="listitem" href="http://www.cppblog.com/ownwaterloo/archive/2009/03.html">2009年3月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl03_Link" class="listitem" href="http://www.cppblog.com/ownwaterloo/archive/2009/02.html">2009年2月 (2)</a></li>
+			
+				</ul>
+			
+	
+		<h1 class="catListTitle">链接</h1>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl01_Link" class="listitem" href="http://blog.vckbase.com/ownwaterloo">ownwaterloo on vckbase</a><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl01_RssLink" title="Subscribe to ownwaterloo on vckbase" class="listitem" href="http://blog.vckbase.com/ownwaterloo/Rss.aspx"><img title="Subscribe to ownwaterloo on vckbase" src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/xml.gif" style="border-width:0px;"></a></li>
+			<li style="margin-top:2px;">在vckbase上的博客，已停止使用。</li>
+				<li class="catListItem"> <a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl02_Link" class="listitem" href="http://wargrey.yo2.cn/">wargrey</a></li>
+			
+				</ul>
+			
+	
+
+
+<script language="JavaScript">
+function SearchGoogle(key,evt,site)
+		{
+			if(evt.keyCode==13 || evt.keyCode==0 || evt.type =='click')
+			{
+				key.focus();
+				var keystr = encodeURIComponent(key.value);
+				url = "http://www.google.com/search?q=";
+				url = url+keystr;
+				url += "&ie=UTF-8&oe=GB2312&hl=zh-CN&domains="+site+"&sitesearch="+site;
+				window.location=url;
+				return false;
+			}
+		}
+</script>
+<h3>搜索</h3>
+<ul>
+	<li>
+		</li><li><input style="WIDTH: 130px" name="q" id="q" onkeydown="return SearchGoogle(document.getElementById('q'),event,'www.cppblog.com/ownwaterloo')" type="text">&nbsp;<input onclick="SearchGoogle(document.getElementById('q'),event,'www.cppblog.com/ownwaterloo')" value="搜索" name="sa" type="button">
+	</li>
+</ul>
+
+<h3>积分与排名</h3>
+<ul>
+	<li>
+		积分 -
+		71829
+	</li><li>
+		排名 -
+		180
+	</li>
+</ul>
+
+<h3>最新随笔</h3>
+<div class="RecentComment">
+<ul style="word-break:break-all">
+	
+	
+			<li><a id="SingleColumn1__2633a1f_RecentPostsList_ctl00_RecentPostsList2_ctl00_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/26/omit_parameter_name.html">1.&nbsp;C与C++的细微区别——省略形式参数名</a></li>
+		
+			<li><a id="SingleColumn1__2633a1f_RecentPostsList_ctl00_RecentPostsList2_ctl01_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/26/omit_return_in_main.html">2.&nbsp;main函数中省略返回语句</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1__2633a1f_RecentPostsList_ctl01_RecentPostsList2_ctl00_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/unacceptable_type_in_va_arg.html">3.&nbsp;可变长参数列表误区与陷阱——va_arg不可接受的类型</a></li>
+		
+			<li><a id="SingleColumn1__2633a1f_RecentPostsList_ctl01_RecentPostsList2_ctl01_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/is_va_end_necessary.html">4.&nbsp;可变长参数列表误区与陷阱——va_end是必须的吗？</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1__2633a1f_RecentPostsList_ctl02_RecentPostsList2_ctl00_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/20/compiler_options_language.html">5.&nbsp;编译器选项——语言</a></li>
+		
+			<li><a id="SingleColumn1__2633a1f_RecentPostsList_ctl02_RecentPostsList2_ctl01_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/20/predefined_macro___cplusplus.html">6.&nbsp;预定义__cplusplus宏</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1__2633a1f_RecentPostsList_ctl03_RecentPostsList2_ctl00_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/16/predefined_macro___GNUC__.html">7.&nbsp;预定义__GNUC__宏</a></li>
+		
+			<li><a id="SingleColumn1__2633a1f_RecentPostsList_ctl03_RecentPostsList2_ctl01_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/16/write_compile_script_for_msvc.html">8.&nbsp;配置msvc命令行环境(续)——编写msvc编译脚本</a></li>
+		
+			<li><a id="SingleColumn1__2633a1f_RecentPostsList_ctl03_RecentPostsList2_ctl02_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/16/get_result_of_preprocessing.html">9.&nbsp;查看源文件预处理结果</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1__2633a1f_RecentPostsList_ctl04_RecentPostsList2_ctl00_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/15/environment_for_using_cl_from_command_line.html">10.&nbsp;配置msvc命令行环境</a></li>
+		
+	
+</ul>
+</div>
+
+<h3>最新评论
+	<a id="SingleColumn1__29df9d8_RSSHyperlink1" href="http://www.cppblog.com/ownwaterloo/CommentsRSS.aspx"><img src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/xml_002.gif" style="border-width:0px;"></a></h3>
+<div class="RecentComment">
+	
+			<ul>
+		
+			<li style="word-break:break-all">
+				<a id="SingleColumn1__29df9d8_CommentList_ctl01_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2013/06/21/81117.html#201193">1.&nbsp;re: C与C++的细微区别——省略形式参数名</a>
+			</li>
+			<li style="word-break:break-all">
+				看了你的分析解决了困扰我很久的问题，太感谢啦！！！
+			</li>
+			<li style="text-align:right;margin-right:4px">
+				--j5682809</li>
+		
+			<li style="word-break:break-all">
+				<a id="SingleColumn1__29df9d8_CommentList_ctl02_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2013/05/08/81117.html#200117">2.&nbsp;re: C与C++的细微区别——省略形式参数名</a>
+			</li>
+			<li style="word-break:break-all">
+				好厉害！gcc就遇到wunused 错误，谢谢~
+			</li>
+			<li style="text-align:right;margin-right:4px">
+				--cjj</li>
+		
+			<li style="word-break:break-all">
+				<a id="SingleColumn1__29df9d8_CommentList_ctl03_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2013/04/14/81116.html#199438">3.&nbsp;re: main函数中省略返回语句[未登录]</a>
+			</li>
+			<li style="word-break:break-all">
+				LOL
+			</li>
+			<li style="text-align:right;margin-right:4px">
+				--null</li>
+		
+			<li style="word-break:break-all">
+				<a id="SingleColumn1__29df9d8_CommentList_ctl04_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2013/01/24/80057.html#197541">4.&nbsp;re: 预定义_MSC_VER宏[未登录]</a>
+			</li>
+			<li style="word-break:break-all">
+				很好的文章，转载一下，谢谢。。。^_^
+			</li>
+			<li style="text-align:right;margin-right:4px">
+				--lance</li>
+		
+			<li style="word-break:break-all">
+				<a id="SingleColumn1__29df9d8_CommentList_ctl05_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2013/01/23/80655.html#197513">5.&nbsp;re: 可变长参数列表误区与陷阱——va_arg不可接受的类型[未登录]</a>
+			</li>
+			<li style="word-break:break-all">
+				干吗要把float提升到double，就差没有想到这一条，害我调试了半天。。float一般不是4个自己吗？也算int对齐的呀，真奇怪。
+			</li>
+			<li style="text-align:right;margin-right:4px">
+				--alex</li>
+		
+			</ul>
+		
+</div>
+
+<h3>阅读排行榜</h3>
+<div class="RecentComment">
+	
+			<ul style="word-break:break-all">
+		
+			<li>
+				<a id="SingleColumn1__184d60f_TopList_ctl01_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/80655.aspx">1.&nbsp;可变长参数列表误区与陷阱——va_arg不可接受的类型(5986)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__184d60f_TopList_ctl02_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/26/81117.aspx">2.&nbsp;C与C++的细微区别——省略形式参数名(5165)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__184d60f_TopList_ctl03_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/15/80059.aspx">3.&nbsp;配置msvc命令行环境(5154)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__184d60f_TopList_ctl04_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/16/80093.aspx">4.&nbsp;查看源文件预处理结果(4869)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__184d60f_TopList_ctl05_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/16/80101.aspx">5.&nbsp;配置msvc命令行环境(续)——编写msvc编译脚本(3723)</a>
+			</li>
+		
+			</ul>
+		
+</div>
+
+<h3>评论排行榜</h3>
+<div class="RecentComment">
+	
+			<ul style="word-break:break-all">
+		
+			<li>
+				<a id="SingleColumn1__1d1bcce_TopList_ctl01_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/21/80655.aspx">1.&nbsp;可变长参数列表误区与陷阱——va_arg不可接受的类型(5)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__1d1bcce_TopList_ctl02_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/26/81117.aspx">2.&nbsp;C与C++的细微区别——省略形式参数名(5)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__1d1bcce_TopList_ctl03_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/04/16/80093.aspx">3.&nbsp;查看源文件预处理结果(4)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__1d1bcce_TopList_ctl04_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/03/06/75709.aspx">4.&nbsp;对malloc的返回值应该如何转型(4)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__1d1bcce_TopList_ctl05_Hyperlink1" href="http://www.cppblog.com/ownwaterloo/archive/2009/02/19/74335.aspx">5.&nbsp;复杂结构体的存取器(4)</a>
+			</li>
+		
+			</ul>
+		
+</div>
+</div>
+	
+</div>
+
+</div>
+
+</div>
+    
+    
+<script type="text/javascript">
+//<![CDATA[
+var Page_ValidationSummaries =  new Array(document.getElementById("AjaxHolder_PostComment_ValidationSummary1"));
+var Page_Validators =  new Array(document.getElementById("AjaxHolder_PostComment_RequiredFieldValidator1"), document.getElementById("AjaxHolder_PostComment_RequiredFieldValidator2"), document.getElementById("AjaxHolder_PostComment_Requiredfieldvalidator4"), document.getElementById("AjaxHolder_PostComment_RequiredFieldValidator3"));
+//]]>
+</script>
+
+<script type="text/javascript">
+//<![CDATA[
+var AjaxHolder_PostComment_RequiredFieldValidator1 = document.all ? document.all["AjaxHolder_PostComment_RequiredFieldValidator1"] : document.getElementById("AjaxHolder_PostComment_RequiredFieldValidator1");
+AjaxHolder_PostComment_RequiredFieldValidator1.controltovalidate = "AjaxHolder_PostComment_tbTitle";
+AjaxHolder_PostComment_RequiredFieldValidator1.errormessage = "请输入标题";
+AjaxHolder_PostComment_RequiredFieldValidator1.evaluationfunction = "RequiredFieldValidatorEvaluateIsValid";
+AjaxHolder_PostComment_RequiredFieldValidator1.initialvalue = "";
+var AjaxHolder_PostComment_RequiredFieldValidator2 = document.all ? document.all["AjaxHolder_PostComment_RequiredFieldValidator2"] : document.getElementById("AjaxHolder_PostComment_RequiredFieldValidator2");
+AjaxHolder_PostComment_RequiredFieldValidator2.controltovalidate = "AjaxHolder_PostComment_tbName";
+AjaxHolder_PostComment_RequiredFieldValidator2.errormessage = "请输入你的姓名";
+AjaxHolder_PostComment_RequiredFieldValidator2.evaluationfunction = "RequiredFieldValidatorEvaluateIsValid";
+AjaxHolder_PostComment_RequiredFieldValidator2.initialvalue = "";
+var AjaxHolder_PostComment_Requiredfieldvalidator4 = document.all ? document.all["AjaxHolder_PostComment_Requiredfieldvalidator4"] : document.getElementById("AjaxHolder_PostComment_Requiredfieldvalidator4");
+AjaxHolder_PostComment_Requiredfieldvalidator4.controltovalidate = "AjaxHolder_PostComment_CodeNumberTextBox";
+AjaxHolder_PostComment_Requiredfieldvalidator4.errormessage = "请输入验证码";
+AjaxHolder_PostComment_Requiredfieldvalidator4.display = "Dynamic";
+AjaxHolder_PostComment_Requiredfieldvalidator4.evaluationfunction = "RequiredFieldValidatorEvaluateIsValid";
+AjaxHolder_PostComment_Requiredfieldvalidator4.initialvalue = "";
+var AjaxHolder_PostComment_RequiredFieldValidator3 = document.all ? document.all["AjaxHolder_PostComment_RequiredFieldValidator3"] : document.getElementById("AjaxHolder_PostComment_RequiredFieldValidator3");
+AjaxHolder_PostComment_RequiredFieldValidator3.controltovalidate = "AjaxHolder_PostComment_tbComment";
+AjaxHolder_PostComment_RequiredFieldValidator3.errormessage = "请输入评论内容";
+AjaxHolder_PostComment_RequiredFieldValidator3.evaluationfunction = "RequiredFieldValidatorEvaluateIsValid";
+AjaxHolder_PostComment_RequiredFieldValidator3.initialvalue = "";
+var AjaxHolder_PostComment_ValidationSummary1 = document.all ? document.all["AjaxHolder_PostComment_ValidationSummary1"] : document.getElementById("AjaxHolder_PostComment_ValidationSummary1");
+AjaxHolder_PostComment_ValidationSummary1.showmessagebox = "True";
+AjaxHolder_PostComment_ValidationSummary1.showsummary = "False";
+//]]>
+</script>
+
+
+<script type="text/javascript">
+//<![CDATA[
+
+var Page_ValidationActive = false;
+if (typeof(ValidatorOnLoad) == "function") {
+    ValidatorOnLoad();
+}
+
+function ValidatorOnSubmit() {
+    if (Page_ValidationActive) {
+        return ValidatorCommonOnSubmit();
+    }
+    else {
+        return true;
+    }
+}
+        
+document.getElementById('AjaxHolder_PostComment_ValidationSummary1').dispose = function() {
+    Array.remove(Page_ValidationSummaries, document.getElementById('AjaxHolder_PostComment_ValidationSummary1'));
+}
+Sys.Application.initialize();
+
+document.getElementById('AjaxHolder_PostComment_RequiredFieldValidator1').dispose = function() {
+    Array.remove(Page_Validators, document.getElementById('AjaxHolder_PostComment_RequiredFieldValidator1'));
+}
+
+document.getElementById('AjaxHolder_PostComment_RequiredFieldValidator2').dispose = function() {
+    Array.remove(Page_Validators, document.getElementById('AjaxHolder_PostComment_RequiredFieldValidator2'));
+}
+
+document.getElementById('AjaxHolder_PostComment_Requiredfieldvalidator4').dispose = function() {
+    Array.remove(Page_Validators, document.getElementById('AjaxHolder_PostComment_Requiredfieldvalidator4'));
+}
+
+document.getElementById('AjaxHolder_PostComment_RequiredFieldValidator3').dispose = function() {
+    Array.remove(Page_Validators, document.getElementById('AjaxHolder_PostComment_RequiredFieldValidator3'));
+}
+//]]>
+</script>
+</form>
+	<script type="text/javascript" src="%E5%8F%AF%E5%8F%98%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8%E8%AF%AF%E5%8C%BA%E4%B8%8E%E9%99%B7%E9%98%B1%E2%80%94%E2%80%94va_arg%E4%B8%8D%E5%8F%AF%E6%8E%A5%E5%8F%97%E7%9A%84%E7%B1%BB%E5%9E%8B_files/ShowHidden.js"></script>   
+	<script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-476124-5']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+	</script>
+
+
+</body></html>

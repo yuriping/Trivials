@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-cn"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>va_start和va_end使用详解 - HarHar - 博客园</title>
+<link type="text/css" rel="stylesheet" href="/bundles/blog-common.css?v=5bITb1XmtieJKhNy3HCsng1mgkC1fjWAtqCxIQA888c1">
+<link id="MainCss" type="text/css" rel="stylesheet" href="va_start%E5%92%8Cva_end%E4%BD%BF%E7%94%A8%E8%AF%A6%E8%A7%A3_files/style.css">
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/hanyonglu/rss">
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/hanyonglu/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/hanyonglu/wlwmanifest.xml">
+<script src="va_start%E5%92%8Cva_end%E4%BD%BF%E7%94%A8%E8%AF%A6%E8%A7%A3_files/jquery.js" type="text/javascript"></script>  
+<script type="text/javascript">var currentBlogApp = 'hanyonglu';</script>
+<script src="/bundles/blog-common.js?v=9G9l_6tgk5-T4vc8dHl7mygV9ZtIeBHIE9SW3_MMyvk1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+	<a id="lnkBlogLogo" href="http://www.cnblogs.com/hanyonglu/"><img id="blogLogo" src="/Skins/custom/images/logo.gif" alt="返回主页"></a>			
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.cnblogs.com/hanyonglu/">HarHar</a></h1>
+<h2><font style="font-size:32px;">简单，快乐，创新，极致……</font>
+<br>&nbsp;<font style="font-size:24px;">【专注于移动与嵌入式领域】</font></h2>
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="navigator">
+			
+<!--done-->
+			<ul id="navList">
+				<li><a id="MyLinks1_HomeLink" class="menu" href="http://www.cnblogs.com/">博客园</a></li>
+				<li><a id="MyLinks1_IngLink" class="menu" href="http://home.cnblogs.com/ing/">闪存</a></li>
+				<li><a id="MyLinks1_MyHomeLink" class="menu" href="http://www.cnblogs.com/hanyonglu/">首页</a></li>
+				<li><a id="MyLinks1_NewPostLink" class="menu" rel="nofollow" href="http://www.cnblogs.com/hanyonglu/admin/EditPosts.aspx?opt=1">新随笔</a></li>
+				<li><a id="MyLinks1_ContactLink" accesskey="9" class="menu" rel="nofollow" href="http://space.cnblogs.com/msg/send/HarHar">联系</a></li>
+				<li><a id="MyLinks1_Admin" class="menu" rel="nofollow" href="http://www.cnblogs.com/hanyonglu/admin/EditPosts.aspx">管理</a></li>
+				<li><a id="MyLinks1_Syndication" class="menu" href="http://www.cnblogs.com/hanyonglu/rss">订阅</a>
+				<a id="MyLinks1_XMLLink" class="aHeaderXML" href="http://www.cnblogs.com/hanyonglu/rss"><img src="va_start%E5%92%8Cva_end%E4%BD%BF%E7%94%A8%E8%AF%A6%E8%A7%A3_files/xml.gif" alt="订阅"></a></li>
+			</ul>
+
+
+			<div class="blogStats">
+				
+				
+<!--done-->
+随笔- 59&nbsp;
+文章- 0&nbsp;
+评论- 798&nbsp;
+
+				
+			</div><!--end: blogStats -->
+		</div><!--end: navigator 博客导航栏 -->
+		
+
+<!--done-->
+<div id="topics">
+	<div class="post">
+		<h1 class="postTitle">
+			<a id="cb_post_title_url" class="postTitle2" href="http://www.cnblogs.com/hanyonglu/archive/2011/05/07/2039916.html">va_start和va_end使用详解</a>
+		</h1>
+		<div class="clear"></div>
+		<div class="postBody">
+			<div id="cnblogs_post_body"><p>　　本文主要介绍va_start和va_end的使用及原理。</p><p>　　在以前的一篇帖子<a style="font-size: 12pt;" id="ctl02_TitleUrl" href="http://www.cnblogs.com/hanyonglu/archive/2011/04/19/2020738.html"><span style="font-size: 12pt;">Format MessageBox 详解</span></a>中曾使用到va_start和va_end这两个宏，但对它们也只是泛泛的了解。</p><p>　　介绍这两个宏之前先看一下C中传递函数的参数时的用法和原理： <br></p><p>1.在C中，当我们无法列出传递函数的所有实参的类型和数目时,可以用省略号指定参数表<br></p><div>void foo(...);<br>void foo(parm_list,...);</div><div>这种方式和我们以前认识的不大一样，但我们要记住这是C中一种传参的形式，在后面我们就会用到它。</div><p><br></p><p>2.函数参数的传递原理<br></p><p>　　函数参数是以数据结构:栈的形式存取,从右至左入栈。</p><div>　　首先是参数的内存存放格式：参数存放在内存的堆栈段中，在执行函数的时候，从最后一个开始入栈。因此栈底高地址，栈顶低地址，举个例子如下：<br>void func(int x, float y, char z);<br>　
+　那么，调用函数的时候，实参 char z 先进栈，然后是 float y，最后是 int x，因此在内存中变量的存放次序是 
+x-&gt;y-&gt;z，因此，从理论上说，我们只要探测到任意一个变量的地址，并且知道其他变量的类型，通过指针移位运算，则总可以顺藤摸瓜找到其
+他的输入变量。</div> <div>　　下面是 &lt;stdarg.h&gt; 里面重要的几个宏定义如下：<br>typedef char* va_list;<br>void va_start ( va_list ap, prev_param ); /* ANSI version */<br>type va_arg ( va_list ap, type ); <br>void va_end ( va_list ap ); <br>va_list 是一个字符指针，可以理解为指向当前参数的一个指针，取参必须通过这个指针进行。<br>&lt;Step 1&gt; 在调用参数表之前，定义一个 va_list 类型的变量，(假设va_list 类型变量被定义为ap)；<br>&lt;Step 2&gt; 然后应该对ap 进行初始化，让它指向可变参数表里面的第一个参数，这是通过 va_start 来实现的，第一个参数是 ap 本身，第二个参数是在变参表前面紧挨着的一个变量,即“...”之前的那个参数；<br>&lt;Step 3&gt; 然后是获取参数，调用va_arg，它的第一个参数是ap，第二个参数是要获取的参数的指定类型，然后返回这个指定类型的值，并且把 ap 的位置指向变参表的下一个变量位置；<br>&lt;Step
+ 4&gt; 获取所有的参数之后，我们有必要将这个 ap 指针关掉，以免发生危险，方法是调用 va_end，他是输入的参数 ap 置为 
+NULL，应该养成获取完参数表之后关闭指针的习惯。说白了，就是让我们的程序具有健壮性。通常va_start和va_end是成对出现。</div><div><div>例如 int max(int n, ...); 其函数内部应该如此实现：<br>#include &lt;iostream.h&gt; <br>void fun(int a, ...) <br>{ <br>　　int *temp = &amp;a;</div>　　temp++;</div><p>　　for (int i = 0; i &lt; a; ++i) <br>　　{ <br>　　　　cout &lt;&lt; *temp &lt;&lt; endl; <br>　　　　temp++; <br>　　} <br>}<br>int main() <br>{ <br>　　int a = 1; <br>　　int b = 2; <br>　　int c = 3; <br>　　int d = 4; <br>　　fun(4, a, b, c, d); <br>　　system("pause"); <br>　　return 0; <br>} <br></p><p>Output:: <br>1 <br>2 <br>3 <br>4</p><div>3:获取省略号指定的参数<br>　　在函数体中声明一个va_list，然后用va_start函数来获取参数列表中的参数，使用完毕后调用va_end()结束。像这段代码： <br>void TestFun(char* pszDest, int DestLen, const char* pszFormat, ...) <br>{ <br>va_list args; <br>va_start(args, pszFormat); //一定要“...”之前的那个参数<br>_vsnprintf(pszDest, DestLen, pszFormat, args); <br>va_end(args); <br>}</div>&nbsp;<div>4.演示如何使用参数个数可变的函数，采用ANSI标准形式 <br>#include 〈stdio.h〉 <br>#include 〈string.h〉 <br>#include 〈stdarg.h〉 <br><br>/*函数原型声明，至少需要一个确定的参数，注意括号内的省略号*/ <br>int demo( char, ... ); <br>void main( void ) <br>{ <br>&nbsp;&nbsp; demo("DEMO", "This", "is", "a", "demo!", ""); <br>} <br><br>/*ANSI标准形式的声明方式，括号内的省略号表示可选参数*/ <br>int demo( char msg, ... ) <br>{ <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /*定义保存函数参数的结构*/<br>&nbsp;&nbsp; va_list argp; <br>&nbsp;&nbsp; int argno = 0; <br>&nbsp;&nbsp; char para; <br>　　&nbsp;&nbsp; /*argp指向传入的第一个可选参数，msg是最后一个确定的参数*/ <br>&nbsp;&nbsp; va_start( argp, msg ); <br>&nbsp;&nbsp; while (1) <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; { <br>&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; para = va_arg( argp, char); <br>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; if ( strcmp( para, "") == 0 ) <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; break; <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; printf("Parameter #%d is: %s\n", argno, para); <br>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; argno++; <br>} <br>va_end( argp ); <br>/*将argp置为NULL*/<br>return 0; <br>}</div><p>&nbsp;以上是对va_start和va_end的介绍。</p><p>&nbsp;</p><p><span class="Apple-tab-span" style="white-space: pre; ">	</span>最后，希望转载的朋友能够尊重作者的劳动成果，加上转载地址：<a href="http://www.cnblogs.com/hanyonglu/archive/2011/05/07/2039916.html">http://www.cnblogs.com/hanyonglu/archive/2011/05/07/2039916.html</a>&nbsp;&nbsp;谢谢。</p><p><span class="Apple-tab-span" style="white-space:pre">	</span></p><p><span class="Apple-tab-span" style="white-space:pre">	</span>完毕。^_^&nbsp;</p><p>&nbsp;</p></div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+
+
+		</div>
+		<div class="postDesc">posted @ <span id="post-date">2011-05-07 17:59</span> <a href="http://www.cnblogs.com/hanyonglu/">HarHar</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href="http://www.cnblogs.com/hanyonglu/admin/EditPosts.aspx?postid=2039916" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(2039916);return false;">收藏</a></div>
+	</div>
+	<script type="text/javascript">var allowComments=true,isLogined=false,cb_blogId=56755,cb_entryId=2039916,cb_blogApp=currentBlogApp,cb_blogUserGuid='723fc49f-4e1b-de11-9510-001cf0cd104b',cb_entryCreatedDate='2011/5/7 17:59:00';loadViewCount(cb_entryId);</script>
+	
+</div><!--end: topics 文章、评论容器-->
+<a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="site_nav_under"><a href="http://www.cnblogs.com/" target="_blank" title="程序员的网上家园">博客园首页</a><a href="http://q.cnblogs.com/" target="_blank" title="程序员问答社区">博问</a><a href="http://news.cnblogs.com/" target="_blank" title="IT新闻">新闻</a><a href="http://home.cnblogs.com/ing/" target="_blank">闪存</a><a href="http://job.cnblogs.com/" target="_blank">程序员招聘</a><a href="http://kb.cnblogs.com/" target="_blank">知识库</a></div>
+<div id="ad_under_post_holder"></div>
+<script type="text/javascript">
+var enableGoogleAd = true;
+var googletag = googletag || {};
+googletag.cmd = googletag.cmd || [];
+fixPostBodyFormat();
+loadAdUnderPost();
+</script>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+loadBlogSignature();
+LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+</script>
+<script type="text/javascript">
+    $.ajax({ url: 'http://counter.cnblogs.com/blog/post/' + cb_entryId, type: 'get', dataType: 'script', cache: true });
+</script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+	<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+
+			<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		
+<!--done-->
+Copyright ©2014 HarHar
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<center><script src="va_start%E5%92%8Cva_end%E4%BD%BF%E7%94%A8%E8%AF%A6%E8%A7%A3_files/stat.php" language="JavaScript"></center>
+<!--PageEndHtml Block End-->
+<script type="text/javascript" src="http://common.cnblogs.com/script/google-analytics.js"></script><script src="va_start%E5%92%8Cva_end%E4%BD%BF%E7%94%A8%E8%AF%A6%E8%A7%A3_files/core.php" charset="utf-8" type="text/javascript"></script><a href="http://www.cnzz.com/stat/website.php?web_id=3822970" target="_blank" title="站长统计"><img src="va_start%E5%92%8Cva_end%E4%BD%BF%E7%94%A8%E8%AF%A6%E8%A7%A3_files/pic.gif" border="0" hspace="0" vspace="0"></a>
+
+
+</center></body></html>

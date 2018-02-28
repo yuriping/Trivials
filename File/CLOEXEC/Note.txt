@@ -1,0 +1,16 @@
+
+About main argc and argv[] parameters using "execl" and its family.
+
+"./test 123 abc" command line will be taken as example for depicted...
+
+0. When process invoked by bash, 
+    argc = 3, 
+    argv[0] = "./test", 
+    argv[1] = "123", 
+    argv[2] = "abc",
+
+1. When invoked by another process via "execl" function family, 
+    argc = 2,             (Not includes process name itself!)
+    argv[0] = "123", 
+    argv[1] = "abc",
+

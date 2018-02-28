@@ -1,0 +1,5 @@
+
+typedef struct ABC * ABC;
+
+after, ABC be a pointer type, not struct itself;
+if you want to use the struct itself, struct ABC is the only way to be quoted.
