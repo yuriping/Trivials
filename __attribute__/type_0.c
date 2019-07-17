@@ -61,6 +61,6 @@ int main(void)
 
 	printf("unpacked = %d, aligned = %d, packed = %d\n", sizeof(UNPACKED_T), sizeof(ALIGNED_T), sizeof(PACKED_T));
 
-        return 0;
+    return 0;
 }
 

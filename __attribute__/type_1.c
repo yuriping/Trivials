@@ -25,6 +25,6 @@ int main(void)
 		printf("%02x-", pch[idx]);
 	printf("\n");
 
-        return 0;
+    return 0;
 }
 
